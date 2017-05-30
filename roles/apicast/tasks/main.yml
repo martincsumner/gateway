@@ -1,0 +1,124 @@
+- name: Create apicast directory
+  file: path="{{apicast_directory}}" follow=yes state=directory
+
+- name: Create apicast directory
+  file: path="{{apicast_startscript}}" follow=yes state=directory
+
+- name: downloading apicast source code
+  get_url: url={{apicast_git_url}}/{{apicast_binary}} dest=/tmp/{{apicast_binary}} mode=0777
+
+- name: copy down the api cast files...
+  unarchive:
+    src: "/tmp/{{apicast_binary}}"
+    dest: "{{apicast_directory}}"
+    copy: no
+
+# used for webhooks client creation - presently not being used.
+#- name: Create apicast directories [main.d]
+#  file: path=/opt/apicast/{{apicast_deployment}}/apicast/{{item}} state=directory
+#  with_items:
+#      - main.d
+#      - client_registrations
+
+#- name: copy over the env conf.
+#  copy:
+#    src: env.conf
+#    owner: root
+#    group: root
+#    dest: /opt/apicast/{{apicast_deployment}}/apicast/main.d/env.conf
+#    mode: 0776
+
+
+#- name: copy over the rh-sso.conf
+#  copy:
+#    src: rh-sso.conf
+#    owner: root
+#    group: root
+#    dest: /opt/apicast/{{apicast_deployment}}/apicast/sites.d/rh-sso.conf
+#    mode: 0776
+
+#- name: copy over the client_registrations
+#  copy:
+#    src: webhook_handler.lua
+#    owner: root
+#    group: root
+#    dest: /opt/apicast/{{apicast_deployment}}/apicast/client_registrations/webhook_handler.lua
+#    mode: 0776
+
+
+
+##add the other tasks into here....
+
+- name: installing more lua dependcies.[ expat-devel ]
+  yum: name='expat-devel' state=present    
+
+- name: installing more lua dependcies.[gcc]
+  yum: name='gcc' state=present  
+
+- name: installing more lua dependcies.[lua-devel ]
+  yum: name='lua-devel' state=present  
+
+- name: install development tools
+  yum: name='@^Development Tools' state=present  
+
+## boil these down....
+- name: install lua expat
+  shell: luarocks install luaexpat --tree=/usr/local/openresty/luajit
+
+- name: install luaxpath
+  shell: luarocks install luaxpath --tree=/usr/local/openresty/luajit
+
+
+- name: create symbolic links to make sure OpenResty will find the installed libraries... 
+  shell: ln -s /usr/local/openresty/luajit/lib64/lua/5.1/* /usr/local/openresty/luajit/lib/lua/5.1/
+
+
+- name: compile the apicast
+  shell: luarocks make apicast/*.rockspec --tree /usr/local/openresty/luajit
+  args:
+   chdir:  "{{apicast_directory}}/{{apicast_deployment}}"
+
+
+##We need to put something in here to create the necessary entries into the file.....
+- name: copy over the start script.
+  copy:
+    src: gateway.sh
+    owner: root
+    group: root
+    dest: "{{apicast_startscript}}/gateway.sh"
+    mode: 0776
+
+
+##configure the startup script.
+- name: Setup gateway script 1. 
+  lineinfile:
+    dest: "{{apicast_startscript}}/gateway.sh"
+    insertafter: '^#!/bin/sh' 
+    state: present
+    line: 'RHSSO_ENDPOINT={{RHSSO}}'
+
+- name: Setup gateway script 2. 
+  lineinfile:
+    dest: "{{apicast_startscript}}/gateway.sh"
+    insertafter: '^#!/bin/sh' 
+    state: present
+    line: 'THREESCALE_PORTAL_ENDPOINT={{GATEWAY_TOKEN}}{{GATEWAY_URI}}'
+
+
+- name: Setup gateway script 3. 
+  lineinfile:
+    dest: "{{apicast_startscript}}/gateway.sh"
+    state: present 
+    insertbefore: BOF
+    line: 'ROOT_DIR={{apicast_directory}}/{{apicast_deployment}}'
+
+
+
+
+
+
+
+
+
+
+
