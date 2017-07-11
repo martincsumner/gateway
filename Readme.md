@@ -21,7 +21,7 @@ When you have done this then open the file ./vars/defaults.yml
 Edit the 3 lines of code appropriately for your environment.
 
 #######################################
-#### VARS You WILL have to customise 
+#### VARS You WILL have to customise
 #######################################
 
 RHSSO: "https://myrhsso.mydomain.com/auth/realms/rhsso"
@@ -38,11 +38,10 @@ Description.
 =============
 What does this do?
 
-1. Sets up a vagrant Centos VM. on top of your host OS. 
+1. Sets up a vagrant Centos VM. on top of your host OS.
 2. Sets up and then installs openresty (the distribution of nginx used by 3scale).
-3. Puts in a copy of the APICast project, compiles the LUA and pulls your config. from the portal.
-3. Deploys the apicast API from a fixed version - you can find this under the roles/apicast/files dir.
-4. finally starts apicast
+3. Checks out the version of apicast you specified under vars/defaults.yml  - apicast-3.0.0 being the default.
+4. Finally sets up a start script for you.
 
 Could you use this playbook to set up a nginx production server? - more or less.
 Maybe this will be a following appdev practise project :-)
@@ -51,6 +50,32 @@ How does this differ from the apicast version 1.0?
 ==================================================
 You do not pull and replace the config. from the portal, rather the gateway is now config. to pull this code directly.
 The conf. has been changed so that any custom changes do not get blatted by subsequent changes to the gateway.
+
+Usage
+=========
+I suggest that you open four terminals and cd each of them to be the root of the gateway project ie. where the Vagrantfile lives.
+
+1. - you will use this for running vagrant - up / halt / destroy / provision
+
+2. - you will use this for stop/starting the gateway : type 'vagrant ssh', then 'cd /l/binary'
+
+      ./gateway.sh start or stop
+
+    you might need to be root for this... sudo su  
+
+3. - use this one for tailing the logs : type 'vagrant ssh', then 'cd /l/gateway/apicast-3.0.0/apicast/logs'
+
+  tail -f error.log
+
+4. - use this one for general noodling about... : vagrant ssh, then cd /gateway
+
+
+5. - Your gateway will now be available on:
+
+    http://192.168.33.10:8080/your stuff.
+
+
+
 
 One last thing....
 ===================
@@ -62,7 +87,7 @@ curl -v -X GET "http://192.168.33.10:8080/search?term=beyonce&entity=musicVideo&
 
 NOTE:
 
-Your user_key is not the access_token used previously, so in the above connection string we are using the user_key, 
+Your user_key is not the access_token used previously, so in the above connection string we are using the user_key,
 this allows the gateway to auth. against the portal.
 
 

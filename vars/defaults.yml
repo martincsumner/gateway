@@ -1,14 +1,14 @@
 #######################################
-#### VARS You WILL have to customise 
+#### VARS You WILL have to customise
 #######################################
 
-RHSSO: "https://apipoc1.org.aalto.fi/auth/realms/aalto_rhsso"
-GATEWAY_URI: "@aalto-university-admin.3scale.net"
-GATEWAY_TOKEN: "ec255f93385da2d3d4dc1e0cf075b8e1c767ea9206ac885ef744f657bc3c279a"
+RHSSO: "<Your RH SSO>"
+GATEWAY_URI: "<@YOUR_NAME-admin.3scale.net>"
+GATEWAY_TOKEN: "<YOUR_ACCESS_TOKEN>"
 
 
 #######################################
-#### VARS You might have to customise! 
+#### VARS You might have to customise!
 #######################################
 
 apicast_directory: /l/gateway
